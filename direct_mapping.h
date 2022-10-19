@@ -1,5 +1,4 @@
-#include <iostream.h>
-#include <stdio.h>
+#include <iostream>
 
 #define CACHE_READ 0
 #define CACHE_WRITE 1

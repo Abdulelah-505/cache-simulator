@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <unistd.h> //for the getopt function
 #include <stdlib.h> //for atoi
 
@@ -43,7 +42,7 @@ bool parseParams(int argc, char *argv[ ], int& cache_capacity,
 	  case ':':       /* -c without operand */
 		fprintf(stderr,
 			"Option -%c requires an operand\n", optopt);
-		errflg++;
+		errflg = true;
 		break;
 	  case '?':
 		fprintf(stderr, "Unrecognised option: -%c\n", optopt);
