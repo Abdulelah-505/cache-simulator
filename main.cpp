@@ -1,9 +1,7 @@
 #include <cmath>
 #include <iostream>
-
 #include "fully.h"
 #include "random_gen.h"
-
 #include <string>
 #include <vector>
 #include <iomanip>
@@ -11,7 +9,7 @@
 #include <ctime>
 
 
-typedef long long ;
+
 int cache_size = 0; // size 
 int cache_block_size = 0;  // block size 
 int number_of_block = 0; // number of blocks
@@ -23,9 +21,6 @@ char *msg[2] = {"Miss","Hit"};
 
 
 using namespace std;
-
-
-
 
 bool cache_simulation(unsigned int address, int cache[3][100000], int type_cache, int &block_counter, int index_address, int tag_address)
 {
@@ -74,12 +69,14 @@ bool cache_simulation(unsigned int address, int cache[3][100000], int type_cache
 
 int main ()
 {
-    int looper=1000000, addr, flag, shift;
+    int looper=10000, addr, flag, shift;
     int cash[3][100000];
     int block_counter=0;
     double hit_counter=0;
     double miss_counter = 0 ;
     int index_addr=0, tag_addr=0;
+    double ratio_hit;
+    double ratio_miss;
   //the values that we get from the 
   //command line will be put into these
   //variables. we can use them later in the program
@@ -122,11 +119,15 @@ int main ()
                 miss_counter++;
             }
         }
-    cout << "Hits  " << hit_counter<<endl << "missess:  "<< dec << cache_misses<<  endl;
+    cout << "Hits: " << hit_counter<<endl << "missess:  "<< dec << cache_misses<<  endl;
 
     }
 
 
+ ratio_hit = hit_counter/(hit_counter+miss_counter);
+    cout <<"Ratio of hits : "<< ratio_hit*100 <<" %"<< endl;
+    ratio_miss = miss_counter/(hit_counter+miss_counter);
+   cout <<"Ratio of miss : "<<ratio_miss*100 <<" %"<< endl;
 
 
 
