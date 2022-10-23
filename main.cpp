@@ -539,7 +539,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-
+	optList = trace_file_list;
 	list<string>::iterator it;
 	for (it = trace_file_list.begin(); it != trace_file_list.end(); it++){
 
