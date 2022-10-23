@@ -1,11 +1,15 @@
 #include<iostream>
-#include<global_var.h>
-#include<read_var.h>
-
+#include <fstream>
+#include"global_var.h"
+#include"read_var.h"
+#include"write_var.h"
 #include<map>
 #include<cmath>
+#include<unordered_map>
 using namespace std;
 
+
+string Bin2Hex(string binary);
 
 class node
 {
@@ -32,40 +36,13 @@ class node
 };
 
 
-// https://people.computing.clemson.edu/~mark/464/p_lru.txt
 
-
-class p_lru{
-    public:
-    node* root;
-
-    void add()
-    {
-        node* temproary = root;
-        while (true)
-        {
-            /* code */
-            if (temproary->bits == false)
-            {
-                /* code */
-                temproary = temproary->left;
-            }
-            if (temproary->bits==true)
-            {
-                /* code */
-                temproary = temproary->right;
-            }   
-        }
-    }
-    void replace(){};
-    p_lru(){}
-};
 
 
 class Blocks{
     public:
     string tags;
-    int LRU_counter = 0;
+    int LRU_counter;
     bool isDirty;
     node* parent;
 
@@ -84,7 +61,6 @@ class set
 {
     public:
     list<Blocks> blocks;
-    p_lru t;
     set(){};
 };
 
@@ -94,7 +70,7 @@ class cache_sim
     public:
     int number;
     int associativity;
-    int size = 0 ;
+    int size = 0;
     map<string , set>taple; //طباعتها بالترتيب tag and index
 
     cache_sim(){}
@@ -114,16 +90,19 @@ void Index(cache_sim &List , string index , string tags , string line);
 void repl(cache_sim &List , string tags , list<Blocks>*tagsList , string line);
 
 
-enum flag
+enum command
 {
     R, W
 };
 
 
-cache_sim cache= cache_sim(1);
+
+char* traceFileName = "";
+
+cache_sim cache = cache_sim(1);
 
 
-flag state;
+command state;
 
 int index_bits = log2(sets_number);
 int offsets_bits = log2(block_size);
@@ -135,11 +114,9 @@ void testInputs() {
 	cache_capacity = 1024;
 	associativity = 2;
 	cache.values_of_set(cache_capacity, associativity);
-
-
 	replacement = 0;
 	inclusion = 0;
-	file_name = "gcc_trace.txt"; 
+	traceFileName = "test.txt"; 
 
 	sets_number = cache_capacity / (associativity * block_size);
 
@@ -147,7 +124,8 @@ void testInputs() {
 	offsets_bits = log2(block_size); 
 	tags_bits = 32 - index_bits - offsets_bits; 
 }
-string Hex_To_Binary(string hex) {
+
+string Hex2Binary(string hex) {
     
 	long int i = 0;
 	string binary = "";
@@ -210,7 +188,8 @@ string Hex_To_Binary(string hex) {
             binary += "1111";
             break;
         default:
-            cout << "Error in hex digit " << hex[i];
+            cout << "Error in hex digit " << hex[i]<<'\t' << binary<<endl;
+
         }
         i++;
     }
@@ -219,14 +198,14 @@ string Hex_To_Binary(string hex) {
 	return binary;
 }
 
-bool Correct_Inputs(int argc, char *argv[]) {
+bool CorrectInputs(int argc, char *argv[]) {
 
 	block_size = atoi(argv[1]);
 	cache_capacity = atoi(argv[2]);
 	associativity = atoi(argv[3]);
 	replacement = atoi(argv[6]);
 	inclusion = atoi(argv[7]);
-	file_name = argv[8];
+	traceFileName = argv[8];
 
 	sets_number = cache_capacity / associativity * block_size;
 
@@ -280,7 +259,7 @@ void Print(cache_sim cache) {
 				break;
 		}
 	
-	cout << "TEST File Name:            " << file_name << endl;
+	cout << "TEST File Name:            " << traceFileName << endl;
 	
 	if (cache_capacity != 0) {
 		cout << "===== cache contents =====" << endl;
@@ -296,7 +275,7 @@ void Print(cache_sim cache) {
 			list<Blocks>::iterator it2;
 			for (it2 = temp.begin(); it2 != temp.end(); it2++) {
 				
-				cout << "\t" << condense(Binary_to_Hex(it2->tags)) << " ";
+				cout << "\t" << condense(Bin2Hex(it2->tags)) << " ";
 				
 				if (it2->isDirty) {
 					cout << "D";
@@ -304,7 +283,7 @@ void Print(cache_sim cache) {
 				else {
 					cout << " ";
 				}
-				if (condense(Binary_to_Hex(it2->tags)).size() < 6) {
+				if (condense(Bin2Hex(it2->tags)).size() < 6) {
 					cout << "\t";
 				} 
 			}
@@ -335,7 +314,6 @@ void Print(cache_sim cache) {
 
 }
 
-
 string tag1_prev = "";
 string tag2_prev = "";
 
@@ -360,7 +338,7 @@ void createMap(unordered_map<string, char> *um)
     (*um)["1111"] = 'f';
 }
 
-string Binary_To_Hex(string bin) {
+string Bin2Hex(string bin) {
     int BinSize = bin.size();
     int findDot = bin.find_first_of('.');
      
@@ -400,7 +378,7 @@ string Binary_To_Hex(string bin) {
     return hex;   
 }
 
-void replace(cache_sim &L, string index, string tag, list<Blocks> *tagsList, string line) {
+void repl(cache_sim &L, string index, string tag, list<Blocks> *tagsList, string line) {
 
 	list<Blocks>::iterator toReplace = tagsList->begin();
 
@@ -541,13 +519,55 @@ void findIndex (cache_sim &L, string index, string tag, string line) {
 }
 
 
-int main()
-{
 
+
+
+int main(int argc, char *argv[]) {
+
+	testInputs(); 
+	string line;
+	ifstream trace_file(traceFileName);
+
+	if (trace_file.is_open()) {
+		while (getline(trace_file, line)) {
+			trace_file_list.push_back(line);
+		}
+		trace_file.close();
+	}
+	else {
+		cout << "Cant find file!!" << endl;
+		return 1;
+	}
+
+	optList = trace_file_list;
+
+	list<string>::iterator it;
+	for (it = trace_file_list.begin(); it != trace_file_list.end(); it++){
+
+		string command = it->substr(0, 1);
+		string address = Hex2Binary(expand(it->substr(it->find(" ") + 1)));
+		
+		//L1
+		string L1tag = address.substr(0, tags_bits);
+		string L1index = address.substr(tags_bits, index_bits);
+		string L1blockOffset = address.substr(tags_bits + index_bits);
+
+		if ((it->find("w") != std::string::npos) || (it->find("W") != std::string::npos)) {
+			state = W;
+			number_or_writes++;
+		}
+		if ((it->find("r") != std::string::npos) || (it->find("R") != std::string::npos)) {
+			state = R;
+			number_or_reads++;
+		}
+		
+		findIndex(cache, L1index, L1tag, it->c_str());
+		
+
+	}
+
+	Print(cache);
 
 
 	return 0;
-
-
-
 }
