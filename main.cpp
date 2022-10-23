@@ -429,7 +429,116 @@ void replace(cache_sim &L, string index, string tag, list<Blocks> *tagsList, str
 
 }
 
+void replaceSame(cache_sim &L, string index, string tag, list<Blocks> *tagsList, string line) {
 
+	list<Blocks>::iterator toReplace = tagsList->begin();
+	
+	if (replacement == 0) {
+
+		list<Blocks>::iterator itFind;
+
+		for (itFind = tagsList->begin(); itFind != tagsList->end(); itFind++) { //find LRU and replace
+			if (itFind->tags == tag) {
+				toReplace = itFind;
+			}
+		}
+
+	if (toReplace->isDirty == true) {
+
+			number_write_back++;
+		}
+		else if (L.number == 2){
+			//WRITE TO MAIN MEMORY
+			number_write_back++;
+		}
+
+	}
+
+
+	Blocks &blk(*toReplace);
+	blk = Blocks(tag, true);	//CORRECT counter updated
+}
+void findTag (cache_sim &L, string index, string tag, string line) {
+
+	list<Blocks>* tagsList = &L.taple[index].blocks; //grab already existing tag list
+
+	bool tagHit = false;
+	list<Blocks>::iterator it;
+
+	for (it = tagsList->begin(); it != tagsList->end(); ++it) { //check if tag exists 
+   		if (it->tags == tag) {
+			tagHit = true;
+			break;
+		}					
+	}
+			
+	if(tagHit) { //if tag was found
+		if (state == R) {
+			it->LRU_counter = counter; //refresh LRU //CORRECTT
+			counter++;
+		}
+		else if (state == W) {
+			repl(L, index, tag, tagsList, line);	
+				
+		}
+	}
+	else { //if tag was not found
+
+		if ((line.find("r") != std::string::npos) || (line.find("R") != std::string::npos)) {
+			if (L.number == 1) {
+				number_or_reads_misses++;
+			}
+		}
+		else if ((line.find("w") != std::string::npos) || (line.find("W") != std::string::npos)) { 
+			if (L.number == 1) {
+				number_write_missess++;
+			}
+		}
+
+		if (tagsList->size() < L.associativity) {
+			if ((line.find("r") != std::string::npos) || (line.find("R") != std::string::npos)) {
+				tagsList->push_back(Blocks(tag, false));
+			}
+			else if ((line.find("w") != std::string::npos) || (line.find("W") != std::string::npos)) { 
+				tagsList->push_back(Blocks(tag, true));
+			}
+		}
+		else { //REPLACE
+			repl(L, index, tag, tagsList, line);
+		}			
+	}			
+}
+void findIndex (cache_sim &L, string index, string tag, string line) {
+
+	if (L.taple.find(index) == L.taple.end()) { //if index doesnt exist //TODO: THERE NEEDS TO BE A CAP I THINK
+
+		if (state == R) {
+			if (L.number == 1) {
+				number_or_reads_misses++;
+			}
+
+		}
+		else if (state == W) {			
+			if (L.number == 1) {
+				number_write_missess++;
+			}
+
+		}	
+
+		list<Blocks> blocks;
+		blocks.push_back(Blocks(tag)); //create list for blocks and add current tag
+				
+		set Set = set();
+		L.taple[index] = Set;
+		L.taple[index].blocks = blocks;
+		
+	}
+			
+	else { //if index found
+		findTag(L, index, tag, line);
+	}
+
+}
 
 
 int main()
