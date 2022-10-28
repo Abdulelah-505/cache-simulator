@@ -10,10 +10,10 @@ using namespace std;
 
 
 MainMemory::MainMemory(){
-	if(DEBUG) cout << "CONSTRUCTING MainMemory obj: " << this << endl;
+	cout << "CONSTRUCTING MainMemory obj: " << this << endl;
 	capacity = 16 * pow(2, 20)  / 4;	// 16 MB to 32 word
 	memory = new (nothrow) int [capacity];
-	if (DEBUG) cout << "main mem capacity: " << capacity << " words" << endl;
+	 cout << "main mem capacity: " << capacity << " words" << endl;
 	if (memory==0){
 		cout << "Failed to allocate memory!\n";
 	}
@@ -27,7 +27,7 @@ MainMemory::~MainMemory(){
     if(memory != NULL){
 		delete [] memory;
     }
-	if (DEBUG) cout << "DESTRUCTED MainMemory obj: " << this << endl;
+	 cout << "DESTRUCTED MainMemory obj: " << this << endl;
 }
 
 int MainMemory::read (int address){
@@ -47,15 +47,15 @@ bool MainMemory::write(int address, int data){
 		return true;		// if write
 	}else{
 		cout << "Invalid memory location or memory NULL" << endl;
-		if (DEBUG) cout << "memory[" << address << "] is " << memory << endl;
-		if (DEBUG) cout << "cap: " << capacity << endl;
+		 cout << "memory[" << address << "] is " << memory << endl;
+		 cout << "cap: " << capacity << endl;
 		
 		return false;
 	}
 }
 
 void MainMemory::print(){
-	cout << "MAIN MEMORY:" << endl;
+	cout << "M M:" << endl;
 	cout << "Address    Words" << endl;
 	
 	int to =  STARTING_ADDRESS + 1023;
