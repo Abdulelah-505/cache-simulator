@@ -8,7 +8,7 @@
 #include "funcs.h"
 #include "main_memory.h"
 #include "cache_memory.h"
-#include "io.h"
+
 using namespace std;
 
 #define CACHE_READ 0
