@@ -11,17 +11,17 @@ int Set::associativity = 0;
 int Set::blockSize = 0;
 int CacheLine::blockSize = 0;
 
-// CacheMemory method definitions
+
 CacheMemory::CacheMemory(int assoc, int bSize, int cap){
 	cout << "CONSTRUCTING CacheMemory obj: " << this << endl;
 	this->capacity = cap * pow(2, 10) / 4;		// convert KiB to words
-	mem = new MainMemory;		// fixed segfault
+	mem = new MainMemory;		
 	associativity = assoc;
 	blockSize = bSize / 4;		// convert from bytes to words
 	hits = misses = writes = reads = totalDirty = totalReads = totalWrites = 0;
 	numSets = capacity / blockSize / associativity;
 	
-	//assert(divides nicely);
+
 	cout << "cache capacity: " << capacity << " words" << endl;
 	cout << "block size: " << blockSize << " words" << endl;
 	cout << "number of sets: " << numSets << " sets" << endl;
@@ -42,13 +42,13 @@ CacheMemory::CacheMemory(int assoc, int bSize, int cap){
 	cout << "set mask: 0x" << sMask << "" << endl;
 	cout << "tag mask: 0x" << tMask << "" << endl;
 
-	// construct array of sets
+	
 	Set::associativity = associativity;
 	Set::blockSize = blockSize;
 	sets = new Set [numSets];
 }
 
-//*** destructor
+
 CacheMemory::~CacheMemory(){
     if(sets != NULL){
 		delete [] sets;
@@ -63,16 +63,16 @@ int CacheMemory::read (unsigned address){
 	int data = -1;
 	++totalReads;
 	
-	parseAddress(address, wordIdx, set, tag);		// parameters passed by reference
+	parseAddress(address, wordIdx, set, tag);		
 	data = sets[set].read(tag, wordIdx, found);	
 
 	if(found){
-		data = sets[set].read(tag, wordIdx, found);		// found passed by ref
+		data = sets[set].read(tag, wordIdx, found);		
 		++hits;
-	}else{		// not found in cache
+	}else{		//if not found in cache
 		++reads;
 		data = mem->read(address);
-		// block to be replaced is dirty; write old block to memory, then replace with new block
+	
 		if(sets[set].line[sets[set].LRU].dirty){
 			int start = spliceAddress(set, sets[set].line[sets[set].LRU].tag);
 			for(int i = 0; i < blockSize; i++)
@@ -82,7 +82,7 @@ int CacheMemory::read (unsigned address){
 		
 		int start = address - (address % blockSize);		// start at first word in block
 		for(int i = 0; i < blockSize; i++)
-			// i never exceeds mem.capacity because both are mulitples of blockSize
+			
 			sets[set].line[sets[set].LRU].word[i] = mem->read(start + i);
 		
 		sets[set].line[sets[set].LRU].tag = tag;
@@ -129,7 +129,7 @@ void CacheMemory::write (unsigned address, int data){
 			sets[set].line[sets[set].LRU].word[address % blockSize] = data; // modify it with the write
 			sets[set].line[sets[set].LRU].dirty = true; // then mark it as dirty
 			sets[set].updateLRU();
-			// ++misses;??????
+		
 			
 		}
 	else
@@ -143,13 +143,13 @@ void CacheMemory::write (unsigned address, int data){
 				}
 			}
 		 }
-		//sets[set].line[] = data;		// write in whole block??
+		//sets[set].line[] = data;		
 		;
 	
 	sets[set].print(set);
 }
 
-// parse out the tag, set and word offset from the address
+
 void CacheMemory::parseAddress (const unsigned address, unsigned &wordIdx, unsigned &set, unsigned &tag){
 	wordIdx = address & wMask;
 	set = (address & sMask) >> wordOffsetBits;	
@@ -218,7 +218,7 @@ unsigned CacheMemory::spliceAddress (unsigned set, unsigned tag){
 // Set methods
 Set::Set() {
 	CacheLine::blockSize = blockSize;
-	line = new CacheLine [associativity];		// CacheLines per set (associativity)
+	line = new CacheLine [associativity];	
 	LRU = 0;
 }
 
