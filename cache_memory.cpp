@@ -13,7 +13,7 @@ int CacheLine::blockSize = 0;
 
 // CacheMemory method definitions
 CacheMemory::CacheMemory(int assoc, int bSize, int cap){
-	if(DEBUG) cout << "CONSTRUCTING CacheMemory obj: " << this << endl;
+	cout << "CONSTRUCTING CacheMemory obj: " << this << endl;
 	this->capacity = cap * pow(2, 10) / 4;		// convert KiB to words
 	mem = new MainMemory;		// fixed segfault
 	associativity = assoc;
@@ -22,25 +22,25 @@ CacheMemory::CacheMemory(int assoc, int bSize, int cap){
 	numSets = capacity / blockSize / associativity;
 	
 	//assert(divides nicely);
-	if(DEBUG) cout << "cache capacity: " << capacity << " words" << endl;
-	if(DEBUG) cout << "block size: " << blockSize << " words" << endl;
-	if(DEBUG) cout << "number of sets: " << numSets << " sets" << endl;
+	cout << "cache capacity: " << capacity << " words" << endl;
+	cout << "block size: " << blockSize << " words" << endl;
+	cout << "number of sets: " << numSets << " sets" << endl;
 	setBits = (float)log(numSets)/log(2);
 	wordOffsetBits = (float)log(blockSize)/log(2);
 	tagBits = 32 - setBits - wordOffsetBits;
 
-	if(DEBUG) cout << "bits for set index: " << setBits << " bits" << endl;
-	if(DEBUG) cout << "bits for word index: " << wordOffsetBits << " bits" << endl;
-	if(DEBUG) cout << "bits for tag: " << tagBits << " bits" << endl;
+	cout << "bits for set index: " << setBits << " bits" << endl;
+	cout << "bits for word index: " << wordOffsetBits << " bits" << endl;
+	cout << "bits for tag: " << tagBits << " bits" << endl;
 
 	// build masks
 	wMask = ( 1 << wordOffsetBits ) - 1;
 	sMask = (( 1 << setBits ) - 1) << wordOffsetBits;
 	tMask = (( 1 << tagBits ) - 1) << (32 - tagBits);
 		
-	if(DEBUG) cout << "word mask: 0x" << hex << wMask << "" << endl;
-	if(DEBUG) cout << "set mask: 0x" << sMask << "" << endl;
-	if(DEBUG) cout << "tag mask: 0x" << tMask << "" << endl;
+	cout << "word mask: 0x" << hex << wMask << "" << endl;
+	cout << "set mask: 0x" << sMask << "" << endl;
+	cout << "tag mask: 0x" << tMask << "" << endl;
 
 	// construct array of sets
 	Set::associativity = associativity;
@@ -92,7 +92,7 @@ int CacheMemory::read (unsigned address){
 		++misses;
 	}
 	
-	if(DEBUG) sets[set].print(set);
+	sets[set].print(set);
 	
 	return data;
 }
@@ -146,7 +146,7 @@ void CacheMemory::write (unsigned address, int data){
 		//sets[set].line[] = data;		// write in whole block??
 		;
 	
-	if(DEBUG) sets[set].print(set);
+	sets[set].print(set);
 }
 
 // parse out the tag, set and word offset from the address
